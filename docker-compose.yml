@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   backend:
@@ -8,16 +8,10 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
-    environment:
-      - NODE_ENV=development
-      - DB_HOST=db  # Use the 'db' service name for the host
-      - DB_PORT=5432
-      - DB_USER=user
-      - DB_PASSWORD=password
-      - DB_NAME=mydb
+    env_file:                  # Load environment variables from backend/.env
+      - ./backend/.env
     depends_on:
-      - db
-    command: ["npm", "run", "dev"]  # Run backend directly, without wait-for-it
+      - frontend
     networks:
       - web-chat
 
@@ -33,22 +27,6 @@ services:
     networks:
       - web-chat
 
-  db:
-    image: postgres:13  # Official PostgreSQL image
-    environment:
-      POSTGRES_USER: user  # Username for DB connection
-      POSTGRES_PASSWORD: password  # Password for DB connection
-      POSTGRES_DB: mydb  # Name of the database
-    volumes:
-      - postgres_data:/var/lib/postgresql/data  # Persist DB data
-    ports:
-      - "5432:5432"  # Expose DB port if needed for testing
-    networks:
-      - web-chat
-
 networks:
   web-chat:
     driver: bridge
-
-volumes:
-  postgres_data: {}  # Volumes for persisting data across container restarts
