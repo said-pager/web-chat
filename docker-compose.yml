@@ -10,9 +10,16 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
+      - DB_HOST=db  # Use the 'db' service name for the host
+      - DB_PORT=5432
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_NAME=mydb
     depends_on:
-      - frontend
-
+      - db
+    command: ["npm", "run", "dev"]  # Run backend directly, without wait-for-it
+    networks:
+      - web-chat
 
   frontend:
     build: ./frontend
@@ -23,7 +30,8 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
-
+    networks:
+      - web-chat
 
   db:
     image: postgres:13  # Official PostgreSQL image
