@@ -1,6 +1,6 @@
 name: Deploy to Contabo
 
-on:
+on: 
     push:
         branches:
             - main
@@ -26,9 +26,6 @@ jobs:
             docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest ./frontend
             docker push ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest
 
-        - name: Copy docker-compose.yml to VPS
-          run: |
-            scp -i ${{ secrets.SSH_KEY }} docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/path/to/your/deployment/folder/
 
         - name: Deploy on Contabo VPS
           uses: appleboy/ssh-action@master
@@ -37,21 +34,9 @@ jobs:
             username: ${{ secrets.SSH_USER }}
             key: ${{ secrets.SSH_KEY }}
             script: |
-                # Login to Docker on the VPS
                 docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" -p "${{ secrets.DOCKERHUB_TOKEN }}"
-
-                # Pull latest images from Docker Hub
                 docker pull ${{ secrets.DOCKERHUB_USERNAME }}/backend:latest
                 docker pull ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest
-
-                # Change directory to where docker-compose.yml is
-                cd /path/to/your/deployment/folder/
-
-                # Bring down any old containers
                 docker-compose down
-
-                # Create and start the containers with the new images
                 docker-compose up -d --force-recreate
-
-                # Clean up unused images
-                docker image prune -af
+                docker image prune -af  # Clean up old image
